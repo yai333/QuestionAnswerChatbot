@@ -1,0 +1,17 @@
+boto3==1.13.16
+botocore==1.16.16
+certifi==2020.4.5.1
+chardet==3.0.4
+docutils==0.15.2
+gevent==20.5.0
+greenlet==0.4.15
+idna==2.9
+jmespath==0.10.0
+python-dateutil==2.8.1
+requests==2.23.0
+requests-aws4auth==0.9
+s3transfer==0.3.3
+six==1.15.0
+urllib3==1.25.9
+websocket==0.2.1
+websocket-client==0.57.0

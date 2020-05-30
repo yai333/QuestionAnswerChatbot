@@ -1,0 +1,96 @@
+service: serverless-chat
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stackName: ${self:service}-${self:provider.stage}
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'ap-southeast-2'}
+  tags:
+    project: chatbot
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "execute-api:ManageConnections"
+      Resource:
+        - "arn:aws:execute-api:*:*:**/@connections/*"
+    - Effect: Allow
+      Action:
+        - "dynamodb:PutItem"
+        - "dynamodb:GetItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
+        - "dynamodb:Query"
+        - "dynamodb:Scan"
+      Resource:
+        - Fn::GetAtt: [ChatConnectionsTable, Arn]
+        - Fn::Join:
+            - "/"
+            - - Fn::GetAtt: [ChatConnectionsTable, Arn]
+              - "*"
+        - Fn::GetAtt: [ChatHistoryTable, Arn]
+        - Fn::Join:
+            - "/"
+            - - Fn::GetAtt: [ChatHistoryTable, Arn]
+              - "*"
+  environment:
+    CHATCONNECTION_TABLE:
+      Ref: ChatConnectionsTable
+
+  websocketApiName: websocket-chat-${self:provider.stage}
+  websocketApiRouteSelectionExpression: $request.body.action
+
+functions:
+  connectionManager:
+    handler: handler.connectionManager
+    events:
+      - websocket:
+          route: $connect
+          authorizer:
+            name: "authFunc"
+            identitySource:
+              - "route.request.querystring.token"
+      - websocket:
+          route: $disconnect
+  authFunc:
+    handler: handler.authFunc
+    environment:
+      APP_CLIENT_ID: ${ssm:/chatbot/${self:provider.stage}/app_client_id}
+      USER_POOL_ID: ${ssm:/chatbot/${self:provider.stage}/user_pool_id}
+
+  defaultMessages:
+    handler: handler.defaultMessage
+    events:
+      - websocket:
+          route: $default
+  sendMessage:
+    handler: handler.sendMessage
+    events:
+      - websocket:
+          route: sendMessage
+resources:
+  Resources:
+    ChatHistoryTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userid
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    ChatConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5

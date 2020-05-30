@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  StackName:
+    Type: String
+  EnvironmentName:
+    Type: String
+  ServiceName:
+    Type: String
+    Default: knn-search
+  TaskDefinition:
+    Type: String
+    Description: Task definition for Api container
+  ContainerPort:
+    Type: Number
+    Default: 8000
+    Description: What port number the application inside the docker container is binding to
+  Path:
+    Type: String
+    Default: "*"
+  Priority:
+    Type: Number
+    Default: 1
+  DesiredCount:
+    Type: Number
+    Default: 1
+    Description: How many copies of the service task to run
+
+Resources:
+  Service:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Ref "ServiceName"
+      Cluster:
+        Fn::ImportValue: !Join [":", [!Ref "StackName", "ECSCluster"]]
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 75
+      DesiredCount: !Ref "DesiredCount"
+      TaskDefinition: !Ref "TaskDefinition"
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - "Fn::ImportValue": !Sub "chatbot-${EnvironmentName}:ContainerSecurityGroup"
+          Subnets:
+            - "Fn::ImportValue": !Sub "chatbot-${EnvironmentName}:PublicSubnetOne"
+            - "Fn::ImportValue": !Sub "chatbot-${EnvironmentName}:PublicSubnetTwo"

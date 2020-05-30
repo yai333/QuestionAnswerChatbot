@@ -1,0 +1,26 @@
+# Distribution / packaging
+.Python
+*.pyc
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+node_modules/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+.git/
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  StackName:
+    Type: String
+
+Resources:
+  ESUrl:
+    DependsOn: Elasticsearch
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /KNNSearch/ESUrl
+      Type: String
+      Value: !GetAtt Elasticsearch.DomainEndpoint
+
+  Elasticsearch:
+    Type: AWS::Elasticsearch::Domain
+    Properties:
+      DomainName: !Sub ${AWS::StackName}-es
+      ElasticsearchVersion: 7.4
+      ElasticsearchClusterConfig:
+        InstanceType: m4.large.elasticsearch
+        ZoneAwarenessEnabled: false
+        InstanceCount: 1
+      EBSOptions:
+        EBSEnabled: true
+        VolumeSize: 10
+      VPCOptions:
+        SubnetIds:
+          - Fn::ImportValue: !Join [":", [!Ref "StackName", "PublicSubnetOne"]]
+        SecurityGroupIds:
+          - Fn::ImportValue:
+              !Join [":", [!Ref "StackName", "EcsHostSecurityGroup"]]
+
+      AccessPolicies:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: "*"
+            Action:
+              - es:ESHttpDelete
+              - es:ESHttpGet
+              - es:ESHttpHead
+              - es:ESHttpPost
+              - es:ESHttpPut
+            Resource: !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${AWS::StackName}-es/*
+
+Outputs:
+  ElasticsearchEndpoint:
+    Description: Elasticsearch endpoint url
+    Value: !GetAtt Elasticsearch.DomainEndpoint

@@ -1,0 +1,57 @@
+{
+  "containerDefinitions": [
+    {
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": $SERVICE_LOG_GROUP,
+          "awslogs-region": "ap-southeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "environment": [
+        {
+          "name": "WS_URL_KEY",
+          "value": $WS_URL_KEY
+        },
+        {
+          "name": "KENDRA_INDEX_KEY",
+          "value": $KENDRA_INDEX_KEY
+        },
+        {
+          "name": "ROBOT_PASS_SSM",
+          "value": $ROBOT_PASS_SSM
+        },
+        {
+          "name": "ROBOT_USER_SSM",
+          "value": $ROBOT_USER_SSM
+        },
+        {
+          "name": "USER_POOL_SSM",
+          "value": $USER_POOL_SSM
+        },
+        {
+          "name": "APP_CLIENT_SSM",
+          "value": $APP_CLIENT_SSM
+        }
+      ],
+      "portMappings": [
+        {
+          "hostPort": 443,
+          "protocol": "tcp",
+          "containerPort": 443
+        }
+      ],
+      "image": $IMAGE,
+      "essential": true,
+      "name": $PROJECT_NAME
+    }
+  ],
+  "taskRoleArn": $TASK_ROLE_ARN,
+  "executionRoleArn": $EXECUTION_ROLE_ARN,
+  "requiresCompatibilities": ["FARGATE", "EC2"],
+  "family": $PROJECT_NAME,
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512"
+}

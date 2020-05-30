@@ -1,0 +1,6 @@
+{
+  "AWS_PROFILE": "default",
+  "INFRA_STACK_NAME_PREFIX": "chatbot-infra",
+  "DEFAULT_REGION": "ap-southeast-2",
+  "SERVICE_STACK_NAME_PREFIX": "chatbot-service"
+}

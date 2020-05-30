@@ -1,0 +1,23 @@
+Type: AWS::DynamoDB::Table
+Properties:
+  AttributeDefinitions:
+    - AttributeName: connectionId
+      AttributeType: S
+    - AttributeName: userid
+      AttributeType: S
+  KeySchema:
+    - AttributeName: connectionId
+      KeyType: HASH
+  ProvisionedThroughput:
+    ReadCapacityUnits: 5
+    WriteCapacityUnits: 5
+  GlobalSecondaryIndexes:
+    - IndexName: userid_index
+      KeySchema:
+        - AttributeName: userid
+          KeyType: HASH
+      Projection:
+        ProjectionType: ALL
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"

@@ -5,7 +5,6 @@ const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
 const jose = require("node-jose");
 const fetch = require("node-fetch");
 const KEYS_URL = `https://cognito-idp.${process.env.AWS_REGION}.amazonaws.com/${process.env.USER_POOL_ID}/.well-known/jwks.json`;
-console.log(KEYS_URL);
 const successfullResponse = {
   statusCode: 200,
   body: "Connected",
@@ -42,10 +41,19 @@ module.exports.defaultMessage = (event, context, callback) => {
 module.exports.sendMessage = async (event, context, callback) => {
   let connectionData;
   try {
-    connectionData = await DDB.scan({
+    const { body } = event;
+    const messageBodyObj = JSON.parse(body);
+    const params = {
+      IndexName: "userid_index",
+      KeyConditionExpression: "userid = :u",
+      ExpressionAttributeValues: {
+        ":u": {
+          S: JSON.parse(messageBodyObj.data).to || "ROBOT",
+        },
+      },
       TableName: process.env.CHATCONNECTION_TABLE,
-      ProjectionExpression: "connectionId",
-    }).promise();
+    };
+    connectionData = await DDB.query(params).promise();
   } catch (err) {
     console.log(err);
     return { statusCode: 500 };
@@ -132,7 +140,6 @@ const authCognitoToken = async (token, methodArn) => {
   const kid = authHeader.kid;
   const rawRes = await fetch(KEYS_URL);
   const response = await rawRes.json();
-  console.log("+++", rawRes);
   if (rawRes.ok) {
     const keys = response["keys"];
     let key_index = -1;

@@ -51,6 +51,15 @@ function Main() {
     ws.current.onerror = (error) => {
       console.log("WebSocket Error " + JSON.stringify(error));
     };
+    ws.current.onclose = function (e) {
+      console.log(
+        "Socket is closed. Reconnect will be attempted in 1 second.",
+        e.reason
+      );
+      setTimeout(function () {
+        setupWebsocket(user);
+      }, 1000);
+    };
     ws.current.onmessage = (event) => {
       const { username } = user;
       const { author, type, data: messageData, audio = "" } = JSON.parse(
@@ -94,6 +103,16 @@ function Main() {
           data: JSON.stringify(newMessage),
         })
       );
+    setMessageList((prev) => {
+      return [
+        ...prev,
+        {
+          author: "me",
+          type: "text",
+          data: newMessage.data,
+        },
+      ];
+    });
   };
 
   return (

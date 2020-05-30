@@ -28,15 +28,9 @@ provider:
             - "/"
             - - Fn::GetAtt: [ChatConnectionsTable, Arn]
               - "*"
-        - Fn::GetAtt: [ChatHistoryTable, Arn]
-        - Fn::Join:
-            - "/"
-            - - Fn::GetAtt: [ChatHistoryTable, Arn]
-              - "*"
   environment:
     CHATCONNECTION_TABLE:
       Ref: ChatConnectionsTable
-
   websocketApiName: websocket-chat-${self:provider.stage}
   websocketApiRouteSelectionExpression: $request.body.action
 
@@ -68,29 +62,7 @@ functions:
     events:
       - websocket:
           route: sendMessage
+
 resources:
   Resources:
-    ChatHistoryTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: userid
-            AttributeType: S
-        KeySchema:
-          - AttributeName: userid
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
-    ChatConnectionsTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: connectionId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: connectionId
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+    ChatConnectionsTable: ${file(resources/chatConnectionsTable.yml)}

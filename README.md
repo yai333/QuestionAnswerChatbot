@@ -6,14 +6,14 @@ This repo provides a proof of concept of question and answer chatbot solution. T
 
 [chatbot.ipynb](chatbot.ipynb)
 
-## Frontend
+## Frontend layer
 
 Frontend React application is in `./frontend` dir. [README](frontend/README.md)
 
-## Backend
+## Backend layer
 
 Serverless project of AWS Websocket API is in `./backend` dir. [README](backend/README.md)
 
-## AWS Fargateway Service
+## AWS Fargateway Service layer
 
 Cloudformation templates and scripts are in `./service` dir. [README](service/README.md)

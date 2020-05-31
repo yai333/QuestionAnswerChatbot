@@ -29,7 +29,6 @@ WS_URL_SSM = ssm.get_parameter(Name=os.environ["WS_URL_KEY"])
 def on_message(ws, message):
     message_obj = json.loads(message)
     result = get_answer(message_obj["data"]["text"])
-    print(result)
     if len(result["ResultItems"]) > 0:
         logger.debug(result["ResultItems"][0]["DocumentExcerpt"]["Text"])
         answer_text = result["ResultItems"][0]["DocumentExcerpt"]["Text"]
